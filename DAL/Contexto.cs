@@ -8,6 +8,7 @@ public class Contexto : DbContext
     }
 
     public DbSet<Productos> Productos { get; set; }
+    public DbSet<Empacado> Empacados { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
