@@ -40,6 +40,13 @@ public class Contexto : DbContext
                 Costo = 4000,
                 Precio = 5600,
                 Existencia = 700
+            },
+            new Productos{
+                ProductoId = 5,
+                Descripcion = "Empaque en fundita",
+                Costo = 4000,
+                Precio = 5600,
+                Existencia = 700
             }
         );
     }
