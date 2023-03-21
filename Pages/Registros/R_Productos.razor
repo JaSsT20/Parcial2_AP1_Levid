@@ -1,0 +1,153 @@
+@page "/R_Productos"
+@inject ProductosBLL ProductosBLL
+@inject EmpacadoBLL EmpacadoBLL
+@inject NotificationService notification
+
+<EditForm Model="empacado" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator/>
+    <div class="card">
+        <div class='card-header'>
+            <h5>Entrada de productos empacados</h5>
+        </div>
+    
+        <div class='card-body'>
+            <label>Id</label>
+            <div id='search-id'>
+                <InputNumber @bind-Value='empacado.EmpacadoId' class='form-control'></InputNumber>
+                <button type='button' class="btn btn-info oi oi-magnifying-glass" @onclick='Buscar'></button>
+            </div>
+            <label>Fecha</label>
+            <InputDate @bind-Value='empacado.Fecha' class='form-control'></InputDate>
+            <label>Concepto</label>
+            <InputText @bind-Value='empacado.Concepto' class='form-control'></InputText>
+            <ValidationMessage For="@(() => empacado.Concepto)" />
+
+            @* Detalle empacados *@
+            <div class='card-header'>
+                <h3>Utilizados</h3>
+            </div>
+                <div class='row'>
+                    <div class='col-md-6'>
+                        <label>Producto</label>
+                        <InputSelect @bind-Value='detalle.ProductoId' class='form-control'>
+                            @foreach (var producto in ListaProductos)
+                            {
+                                <option value='@producto.ProductoId'>@producto.Descripcion</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => detalle.ProductoId)" />
+                    </div>
+                    <div class='col-md-6'>
+                        <label>Cantidad</label>
+                        <div id='detalle-der-id'>
+                            <InputNumber @bind-Value='detalle.Cantidad' class='form-control'></InputNumber>
+                            <button type='button' class='btn btn-success oi oi-plus' @onclick='AgregarDetalle'></button>
+                        </div>
+                    </div>
+            </div>
+            <table class='table'>
+                <thead>
+                    <th>ProductoId</th>
+                    <th>Descripcion</th>
+                    <th>Cantidad</th>
+                </thead>
+                <tbody>
+                    @foreach(var det in empacado.EmpacadoDetalles)
+                    {
+                        <tr>
+                            <td>@det.ProductoId</td>
+                            <td></td> @*IDK*@
+                            <td>@det.Cantidad</td>
+                            <td><button type='button' class='btn btn-danger oi oi-trash' @onclick=@(() => EliminarDetalle(det))></button></td>
+                        </tr>
+                    }
+                </tbody>
+                <h4>Total: @empacado.EmpacadoDetalles.Sum(det => det.Cantidad)</h4>
+            </table>
+        </div>
+    
+        <div class='card-footer'>
+            <button type='button' class='btn btn-primary' @onclick='Nuevo'> Nuevo </button>
+            <button type='submit' class='btn btn-success' @onclick='Guardar'> Guardar </button>
+            <button type='button' class='btn btn-danger' @onclick='Eliminar'> Eliminar </button>
+        </div>
+    </div>
+</EditForm>
+@code{
+
+    public Productos producto { get; set; } = new Productos();
+    public EmpacadoDetalle detalle { get; set; } = new EmpacadoDetalle();
+    public Empacado empacado { get; set; } = new Empacado();
+    public List<Productos> ListaProductos { get; set; } = new List<Productos>();
+
+    protected override void OnInitialized()
+    {
+        ListaProductos = ProductosBLL.GetList(op => true);   
+    }
+    void Buscar()
+    {
+        var encontrado = EmpacadoBLL.Buscar(empacado.EmpacadoId);
+        if(encontrado != null)
+        {
+            empacado = encontrado;
+            notification.ShowMessage("Encontrado", "se han cargado los datos.", NotificationSeverity.Info);
+        }
+        else
+        {
+            notification.ShowMessage("Oops!", "parece que no hay empaquetado con ese Id", NotificationSeverity.Warning);
+        }
+    }
+    void Guardar()
+    {
+        if(!Validar())
+        {
+            notification.ShowMessage("Advertencia", "Los campos deben llenarse correctamente.", NotificationSeverity.Warning);
+            return;
+        }
+            
+        else
+        {
+            if(EmpacadoBLL.Guardar(empacado))
+            {
+                notification.ShowMessage("¡Guardado!", "Se ha guardado correctamente.", NotificationSeverity.Success);
+                Nuevo();
+            }       
+        }
+    }
+    bool Validar()
+    {
+        if(string.IsNullOrEmpty(empacado.Concepto))
+            return false;
+        if(detalle.EmpacadoId <= 0)
+            return false;
+        if(detalle.Cantidad <= 0)
+            return false;
+        else
+            return true;
+    }
+    void Nuevo()
+    {
+        empacado = new Empacado();
+        detalle = new EmpacadoDetalle();
+        notification.ShowMessage("Nuevo", "Listo para ser llenado.", NotificationSeverity.Info);
+    }
+    void Eliminar()
+    {
+        if(EmpacadoBLL.Eliminar(empacado))
+            Nuevo();
+    }
+    void AgregarDetalle()
+    {
+        if(detalle.ProductoId > 0)
+        {
+            empacado.EmpacadoDetalles.Add(detalle);
+            detalle = new EmpacadoDetalle();
+            empacado.EmpacadoDetalles.Sum(det => det.Cantidad);
+        }
+    }
+    void EliminarDetalle(EmpacadoDetalle EmpDetalle)
+    {
+        empacado.EmpacadoDetalles.Remove(EmpDetalle);
+    }
+
+}
