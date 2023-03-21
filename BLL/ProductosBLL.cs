@@ -7,9 +7,13 @@ public class ProductosBLL
     {	
         _contexto = contexto;
     }
-    
     public List<Productos> GetList(Expression<Func<Productos,bool>> criterio)
     {
         return _contexto.Productos.AsNoTracking().Where(criterio).ToList();
+    }
+
+    public Productos? Buscar(int ProductoId)
+    {
+        return _contexto.Productos.Where(prod => prod.ProductoId == ProductoId).AsNoTracking().SingleOrDefault();
     }
 }

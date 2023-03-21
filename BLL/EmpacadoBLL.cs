@@ -14,23 +14,55 @@ public class EmpacadoBLL
     }
     public bool Insertar(Empacado empacado)
     {
-        _contexto.Empacados.Add(empacado);
-        return _contexto.SaveChanges() > 0;   
+        try{
+            _contexto.Empacados.Add(empacado);
+            return _contexto.SaveChanges() > 0;  
+        }
+        catch(Exception)
+        {
+            return false;
+        }
     }
     public bool Modificar(Empacado empacado)
     {
-        _contexto.Database.ExecuteSqlRaw($"DELETE FROM EmpacadoDetalle WHERE EmpacadoId = {empacado.EmpacadoId}");
-        foreach (var emp in empacado.EmpacadoDetalles)
-        {
-            _contexto.Entry(empacado).State = EntityState.Added;
+        try{
+            _contexto.Database.ExecuteSqlRaw($"DELETE FROM EmpacadoDetalle WHERE EmpacadoId = {empacado.EmpacadoId}");
+            foreach (var emp in empacado.EmpacadoDetalles)
+            {
+                _contexto.Entry(empacado).State = EntityState.Added;
+            }
+            _contexto.Entry(empacado).State = EntityState.Modified;
+            return _contexto.SaveChanges() > 0;
         }
-        _contexto.Entry(empacado).State = EntityState.Modified;
-        return _contexto.SaveChanges() > 0;
+        catch(Exception)
+        {
+            return false;
+        }
+    }
+    public bool Guardar(Empacado empacado)
+    {
+        try{
+            if(!Existe(empacado.EmpacadoId))
+                return Insertar(empacado);
+            else
+                return Modificar(empacado);   
+        }
+        catch(Exception)
+        {
+            return false;
+        }
     }
     public bool Eliminar(Empacado empacado)
     {
-        _contexto.Entry(empacado).State = EntityState.Deleted;
-        return _contexto.SaveChanges() > 0;
+        try{
+            _contexto.Entry(empacado).State = EntityState.Deleted;
+            return _contexto.SaveChanges() > 0;
+        }
+        catch(Exception)
+        {
+            return false;
+        }
+        
     }
     public Empacado? Buscar(int EmpacadoId)
     {
