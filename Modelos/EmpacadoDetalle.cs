@@ -9,6 +9,8 @@ public class EmpacadoDetalle
     public int ProductoId { get; set; }
     [ForeignKey("EmpacadoId")]
     public int EmpacadoId { get; set; }
+    [Required(ErrorMessage = "Este campo es obligatorio.")]
+    [Range(1, 800000, ErrorMessage = "El rango es entre {1} y {2}")]
     public int Cantidad { get; set; }
 
 }
