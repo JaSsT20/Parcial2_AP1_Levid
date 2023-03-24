@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Parcial2_Levid.Migrations
 {
     /// <inheritdoc />
-    public partial class Initi : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +20,8 @@ namespace Parcial2_Levid.Migrations
                     EmpacadoId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Concepto = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false)
+                    Concepto = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    Cantidad = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

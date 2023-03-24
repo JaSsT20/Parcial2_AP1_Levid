@@ -5,6 +5,7 @@ public class EmpacadoDetalle
 {
     [Key]
     public int Id { get; set; }
+    [Required(ErrorMessage = "Debe seleccionar un producto.")]
     [ForeignKey("ProductoId")]
     public int ProductoId { get; set; }
     [ForeignKey("EmpacadoId")]

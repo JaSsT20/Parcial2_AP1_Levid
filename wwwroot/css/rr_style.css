@@ -8,3 +8,11 @@
 #detalle-der-id{
     display: flex;
 }
+
+.index h3{
+    text-align: center;
+}
+.index label{
+    display: block;
+    float: right;
+}

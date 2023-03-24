@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Parcial2_Levid.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20230320235729_Initi")]
-    partial class Initi
+    [Migration("20230324024542_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,9 @@ namespace Parcial2_Levid.Migrations
                 {
                     b.Property<int>("EmpacadoId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Cantidad")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Concepto")

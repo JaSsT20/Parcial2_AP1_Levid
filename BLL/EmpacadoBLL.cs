@@ -66,10 +66,10 @@ public class EmpacadoBLL
     }
     public Empacado? Buscar(int EmpacadoId)
     {
-        return _contexto.Empacados.Where(emp => emp.EmpacadoId == EmpacadoId).AsNoTracking().SingleOrDefault();   
+        return _contexto.Empacados.Include(e => e.EmpacadoDetalles).Where(emp => emp.EmpacadoId == EmpacadoId).AsNoTracking().SingleOrDefault();   
     }
     public List<Empacado> GetList(Expression<Func<Empacado,bool>> criterio)
     {
-        return _contexto.Empacados.AsNoTracking().Where(criterio).ToList();
+        return _contexto.Empacados.Include(e => e.EmpacadoDetalles).AsNoTracking().Where(criterio).ToList();
     }
 }

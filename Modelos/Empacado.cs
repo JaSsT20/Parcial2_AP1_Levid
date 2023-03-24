@@ -8,5 +8,6 @@ public class Empacado
     [Required(ErrorMessage = "El campo es requerido.")]
     [StringLength(500, MinimumLength = 5, ErrorMessage = "Debe introducir un concepto valido entre {1} y {2} caracteres.")]
     public string Concepto { get; set; } = string.Empty;
+    public int Cantidad { get; set; }
     public List<EmpacadoDetalle> EmpacadoDetalles { get; set; } = new List<EmpacadoDetalle>();
 }

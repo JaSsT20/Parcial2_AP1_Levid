@@ -22,6 +22,9 @@ namespace Parcial2_Levid.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Concepto")
                         .IsRequired()
                         .HasMaxLength(500)

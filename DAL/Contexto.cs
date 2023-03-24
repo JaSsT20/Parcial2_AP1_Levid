@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 public class Contexto : DbContext
 {
+    #nullable disable
     public Contexto(DbContextOptions<Contexto> options) : base(options)
     {
         
