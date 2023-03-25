@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Parcial2_Levid.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20230324024542_Init")]
-    partial class Init
+    [Migration("20230325142312_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
