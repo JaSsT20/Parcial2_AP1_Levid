@@ -1,26 +1,110 @@
-@page "/C_Empaquetado"
+@page "/C_Empaquetados"
+@inject EmpacadoBLL EmpacadoBLL
+@inject NotificationService message
 
-<table class='table'>
-    <thead>
-        <th>Id</th>
-        <th>Descripcion</th>
-        <th>Cantidad</th>
-        <th></th>
-    </thead>
-    <tbody>
-        @foreach(var det in empacado.EmpacadoDetalles)
-        {
+<div class="card-header">
+    <h2>Consulta Empaquetados</h2>
+    <div class='row'>
+        @* Filtro *@
+        <div class='col-md-6'>
+            <label>Filtro</label>  
+            <select id="c_filtro" class="form-control" @bind="opcion">
+                <option value=0>Sin filtro</option>
+                <option value=1>EmpacadoId</option>
+                <option value=2>Fecha</option>
+            </select>
+        </div>
+        <div class='col-md-6'>
+        @* Criterio *@
+            <label>Criterio</label>
+            <div id="search-id">
+                <input id="c_buscar" type="text" class="form-control" @bind="criterio" disabled="@inputCriterio"/>
+                <button type="button" class="btn btn-info oi oi-magnifying-glass" @onclick="Filtrar"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-body">
+    <table class="table">
+        <thead>
             <tr>
-                <td>@det.</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Concepto</th>
+                <th>Cantidad</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
 
-@code{
-    public Empacado empacado { get; set; } = new Empacado();
+        <tbody>
+            @foreach(var empacado in Resultados)
+            {
+                <tr>
+                    <td>@empacado.EmpacadoId</td>
+                    <td>@empacado.Fecha</td>
+                    <td>@empacado.Concepto</td>
+                    <td>@empacado.Cantidad</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    public int opcion { get; set;}
+    public List<Empacado> Resultados { get; set; } = new List<Empacado>();
+    public bool inputCriterio {get {return opcion == 0;}}
+    public string criterio {get; set;} = string.Empty;
+    protected override void OnInitialized()
+    {
+        Resultados  = EmpacadoBLL.GetList(emp => true);
+    }
+    private void Filtrar()
+    {
+        switch (opcion)
+        {
+            case 0:
+            {
+                MostrarTodo();
+                break;
+            }               
+            case 1:
+            {
+                BuscarPorId();
+                break;
+            }
+            case 2:
+            {
+                BuscarPorFecha();
+                break;
+            }
+        }
+        if (Resultados.Any() == false)
+            message.ShowMessage("Oops!","Parece que no se han encontrado resultados.", NotificationSeverity.Warning);
+    }
+
+    void BuscarPorId()
+    {
+        int idBuscado = 0;
+        if (int.TryParse(criterio, out idBuscado))
+        {
+            Resultados = EmpacadoBLL.GetList(emp => emp.EmpacadoId == idBuscado);
+        }
+        else
+        {
+            message.ShowMessage("Valor inválido","El criterio de busqueda debe ser un entero. EJ: 1", NotificationSeverity.Error);
+            return;
+        }
+    }
+    void BuscarPorFecha()
+    {
+        if (DateTime.TryParse(criterio, out DateTime fechaBuscada))
+            Resultados = EmpacadoBLL.GetList(emp => emp.Fecha == fechaBuscada);
+        else
+            message.ShowMessage("Fecha inválida","Debe colocar una fecha válida, EJ: 20/02/23", NotificationSeverity.Error);
+    }
+    void MostrarTodo()
+    {
+        Resultados = EmpacadoBLL.GetList(emp => true);
+    }
 }
