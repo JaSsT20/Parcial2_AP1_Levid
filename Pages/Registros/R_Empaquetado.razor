@@ -177,7 +177,8 @@
                 return;
         }
         var producto = ProductosBLL.Buscar(detalle.ProductoId);
-        if(producto != null && producto.Existencia < detalle.Cantidad){
+        if(producto != null && producto.Existencia < detalle.Cantidad)
+        {
             notification.ShowMessage("Error", "La cantidad deseada supera la disponible", NotificationSeverity.Warning);
                 return;
         }
@@ -186,10 +187,10 @@
     }
     void EliminarDetalle(EmpacadoDetalle det)
     {
-        var detalleEncontado = empacado.EmpacadoDetalles.Find(d => d.Id == detalle.Id);
-        if(detalleEncontado != null)
+        var detEnc = empacado.EmpacadoDetalles.Find(d => d.Id == det.Id);
+        if(detEnc != null)
         {
-            det = detalleEncontado;
+            det = detEnc;
             empacado.EmpacadoDetalles.Remove(det); 
         }
     }
