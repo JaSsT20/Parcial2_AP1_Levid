@@ -34,12 +34,12 @@ public class EmpacadoBLL
                 _contexto.Entry(producido).State = EntityState.Modified;
             }
             _contexto.Entry(empacado).State = EntityState.Added;
-            modificado = _contexto.SaveChanges() >0;
+            modificado = _contexto.SaveChanges() > 0;
             _contexto.Entry(empacado).State = EntityState.Detached;
         } 
         catch(Exception)
         {
-            return modificado;
+            return false;
         }
         return modificado;
     }
@@ -47,23 +47,24 @@ public class EmpacadoBLL
     {
         bool modificado = false;
         try{
-            var EmpacadoAntiguo = Buscar(empacado.EmpacadoId);
+            var empacadoEnc = Buscar(empacado.EmpacadoId);
             Productos? producto;
-            if(EmpacadoAntiguo != null){
-                foreach(var detalle in EmpacadoAntiguo.EmpacadoDetalles)
+            if(empacadoEnc != null)
+            {
+                foreach(var detalle in empacadoEnc.EmpacadoDetalles)
                 {
                     producto = _contexto.Productos.Find(detalle.Id);
                     if(producto !=null)
                         producto.Existencia += detalle.Cantidad;
                 }
-                var producidoAntiguo = _contexto.Productos.Find(EmpacadoAntiguo.ProductoId);
-                if(producidoAntiguo != null)
+                var producEnc = _contexto.Productos.Find(empacadoEnc.ProductoId);
+                if(producEnc != null)
                 {
-                    producidoAntiguo.Existencia -= EmpacadoAntiguo.Cantidad;
-                    _contexto.Entry(producidoAntiguo).State = EntityState.Modified;
+                    producEnc.Existencia -= empacadoEnc.Cantidad;
+                    _contexto.Entry(producEnc).State = EntityState.Modified;
                 }
             }
-            _contexto.Database.ExecuteSqlRaw($"DELETE FROM EmpacadosDetalle WHERE EmpacadoId = {empacado.EmpacadoId}");
+            _contexto.Database.ExecuteSqlRaw($"DELETE FROM EmpacadoDetalle WHERE EmpacadoId = {empacado.EmpacadoId}");
             foreach (var nuevo in empacado.EmpacadoDetalles)
             {
                 producto = _contexto.Productos.Find(nuevo.Id);
@@ -71,11 +72,11 @@ public class EmpacadoBLL
                     producto.Existencia -= nuevo.Cantidad;
                 _contexto.Entry(nuevo).State = EntityState.Added;
             }
-            var ProducidoNuevo = _contexto.Productos.Find(empacado.ProductoId);
-            if(ProducidoNuevo != null)
+            var ProdEnc = _contexto.Productos.Find(empacado.ProductoId);
+            if(ProdEnc != null)
             {
-                ProducidoNuevo.Existencia += empacado.Cantidad;
-                _contexto.Entry(ProducidoNuevo).State = EntityState.Modified;
+                ProdEnc.Existencia += empacado.Cantidad;
+                _contexto.Entry(ProdEnc).State = EntityState.Modified;
             }
             _contexto.Entry(empacado).State = EntityState.Modified;
             modificado= _contexto.SaveChanges() > 0;
@@ -127,7 +128,7 @@ public class EmpacadoBLL
         }
         catch(Exception)
         {
-            return modificado;
+            return false;
         }
         return modificado;
     }
