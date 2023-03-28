@@ -1,0 +1,104 @@
+@page "/R_Productos"
+@inject ProductosBLL ProductosBLL
+@inject NotificationService notify
+
+
+<EditForm Model="producto" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class='card'>
+        <div class='card-header'>
+            <h3>Registro de productos</h3>
+        </div>
+
+        <div class='card-body'>
+            @* ProductId *@
+            <label>ProductoId</label>
+            <div id='search-id'>
+                <InputNumber @bind-Value='producto.ProductoId' class='form-control'></InputNumber>
+                <button type='button' class='btn btn-info oi oi-magnifying-glass' @onclick='Buscar'></button>
+            </div>
+            @* Descripcion *@
+            <label>Descripcion</label>
+            <InputText @bind-Value='producto.Descripcion' class='form-control'></InputText>
+            <ValidationMessage For="@(() => producto.Descripcion)" />
+            <div class='row'>
+                @* Costo *@
+                <div class='col-md-6'>
+                    <label>Costo</label>
+                    <InputNumber @bind-Value='producto.Costo' class='form-control'></InputNumber>
+                    <ValidationMessage For="@(() => producto.Costo)" />
+                </div>
+                <div class='col-md-6'>
+                    <label>Precio</label>
+                    <InputNumber @bind-Value='producto.Precio' class='form-control'></InputNumber>
+                    <ValidationMessage For="@(() => producto.Precio)" />
+                </div>
+            </div>
+            @* Existencia *@
+            <label>Existencia</label>
+            <InputNumber @bind-Value='producto.Existencia' class='form-control'></InputNumber>
+            <ValidationMessage For="@(() => producto.Existencia)" />
+            
+        </div>
+    
+        <div class='card-footer'>
+            <button type='button' class='btn btn-primary' @onclick='Nuevo'> Nuevo </button>
+            <button type='submit' class='btn btn-success' @onclick='Guardar'> Guardar </button>
+            <button type='button' class='btn btn-danger'@onclick='Eliminar'> Eliminar </button>
+        </div>
+    </div>
+</EditForm>
+
+@code{
+    public Productos producto { get; set; } = new Productos();
+
+    void Buscar()
+    {
+        var productoEnc = ProductosBLL.Buscar(producto.ProductoId);
+        if(productoEnc != null)
+        {
+            producto = productoEnc;
+        }
+        else
+        {
+            Nuevo();
+        }
+    }
+    void Guardar()
+    {
+        if(!Validate())
+        {
+            notify.Advertencia("No se ha podido guardar correctamente.");
+            return;
+        }
+        if(ProductosBLL.Guardar(producto))
+        {
+            Nuevo();
+        }
+    }
+    void Nuevo()
+    {
+        producto = new Productos();
+    }
+    void Eliminar()
+    {
+        if(ProductosBLL.Eliminar(producto))
+        {
+            Nuevo();
+        }
+    }
+    bool Validate()
+    {
+        if(string.IsNullOrEmpty(producto.Descripcion))
+            return false;
+        if(producto.Existencia <= 0)
+            return false;
+        if(producto.Precio <= 0)
+            return false;
+        if(producto.Costo <= 0)
+            return false;
+        else
+            return true;
+    }
+}

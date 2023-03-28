@@ -74,7 +74,7 @@
             <div class='row'>
                 <div class='col-md-6'>
                     <label>Producto</label>
-                    <InputSelect @bind-Value='detalle.ProductoId' class='form-control'>
+                    <InputSelect @bind-Value='empacado.ProductoId' class='form-control'>
                         @foreach (var prod in ListaProductos)
                         {
                             <option value="@prod.ProductoId">@prod.Descripcion</option>
@@ -83,7 +83,7 @@
                 </div>
                 <div class='col-md-6'>
                     <label>Cantidad</label>
-                    <InputNumber @bind-Value='empacado.Cantidad' class='form-control'></InputNumber>
+                    <InputNumber @bind-Value='detalle.Cantidad' class='form-control'></InputNumber>
                 </div>
             </div>
             
@@ -143,7 +143,6 @@
         }
         else
         {
-            AfectarExistencia();
             empacado.Cantidad = empacado.EmpacadoDetalles.Sum(det => det.Cantidad);
             if(EmpacadoBLL.Guardar(empacado))
             {
@@ -156,7 +155,7 @@
     {
         if(string.IsNullOrEmpty(empacado.Concepto))
             return false;
-        if(detalle.Cantidad <= 0)
+        if(empacado.EmpacadoDetalles.Count <= 0)
             return false;
         else
             return true;
@@ -172,26 +171,26 @@
         if(EmpacadoBLL.Eliminar(empacado))
             Nuevo();
     }
-    void AgregarDetalle()
-    {
-        if(detalle.ProductoId > 0)
-        {
-            empacado.EmpacadoDetalles.Add(detalle);
-            detalle = new EmpacadoDetalle();
-            empacado.EmpacadoDetalles.Sum(det => det.Cantidad);
+    void AgregarDetalle(){
+        if(detalle.Cantidad <= 0){
+            notification.ShowMessage("Error", "La cantidad debe ser mayor que cero.", NotificationSeverity.Warning);
+                return;
         }
+        var producto = ProductosBLL.Buscar(detalle.ProductoId);
+        if(producto != null && producto.Existencia < detalle.Cantidad){
+            notification.ShowMessage("Error", "La cantidad deseada supera la disponible", NotificationSeverity.Warning);
+                return;
+        }
+        empacado.EmpacadoDetalles.Add(detalle);
+        detalle = new EmpacadoDetalle();   
     }
-    void EliminarDetalle(EmpacadoDetalle EmpDetalle)
+    void EliminarDetalle(EmpacadoDetalle det)
     {
-        empacado.EmpacadoDetalles.Remove(EmpDetalle);
-    }
-    void AfectarExistencia()
-    {
-        foreach (var item in empacado.EmpacadoDetalles)
+        var detalleEncontado = empacado.EmpacadoDetalles.Find(d => d.Id == detalle.Id);
+        if(detalleEncontado != null)
         {
-            var prod = ProductosBLL.Buscar(item.ProductoId);
-            if(prod != null)
-                prod.Existencia -= item.Cantidad;
+            det = detalleEncontado;
+            empacado.EmpacadoDetalles.Remove(det); 
         }
     }
 }

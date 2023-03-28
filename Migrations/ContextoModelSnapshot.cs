@@ -33,6 +33,9 @@ namespace Parcial2_Levid.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("EmpacadoId");
 
                     b.ToTable("Empacados");

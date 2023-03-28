@@ -14,30 +14,78 @@ public class EmpacadoBLL
     }
     public bool Insertar(Empacado empacado)
     {
+        bool modificado = false;
         try{
-            _contexto.Empacados.Add(empacado);
-            return _contexto.SaveChanges() > 0;  
-        }
+            Productos? producto;
+            foreach(var detalle in empacado.EmpacadoDetalles)
+            {
+                producto = _contexto.Productos.SingleOrDefault(p => p.ProductoId == detalle.ProductoId);
+                if(producto != null)
+                {
+                    producto.Existencia -= detalle.Cantidad;
+                    _contexto.Entry(producto).State = EntityState.Modified;
+                    _contexto.Entry(detalle).State = EntityState.Added;
+                }
+            }
+            var producido = _contexto.Productos.SingleOrDefault(p => p.ProductoId == empacado.ProductoId);
+            if(producido != null)
+            {
+                producido.Existencia += empacado.Cantidad;
+                _contexto.Entry(producido).State = EntityState.Modified;
+            }
+            _contexto.Entry(empacado).State = EntityState.Added;
+            modificado = _contexto.SaveChanges() >0;
+            _contexto.Entry(empacado).State = EntityState.Detached;
+        } 
         catch(Exception)
         {
-            return false;
+            return modificado;
         }
+        return modificado;
     }
     public bool Modificar(Empacado empacado)
     {
+        bool modificado = false;
         try{
-            _contexto.Database.ExecuteSqlRaw($"DELETE FROM EmpacadoDetalle WHERE EmpacadoId = {empacado.EmpacadoId}");
-            foreach (var emp in empacado.EmpacadoDetalles)
+            var EmpacadoAntiguo = Buscar(empacado.EmpacadoId);
+            Productos? producto;
+            if(EmpacadoAntiguo != null){
+                foreach(var detalle in EmpacadoAntiguo.EmpacadoDetalles)
+                {
+                    producto = _contexto.Productos.Find(detalle.Id);
+                    if(producto !=null)
+                        producto.Existencia += detalle.Cantidad;
+                }
+                var producidoAntiguo = _contexto.Productos.Find(EmpacadoAntiguo.ProductoId);
+                if(producidoAntiguo != null)
+                {
+                    producidoAntiguo.Existencia -= EmpacadoAntiguo.Cantidad;
+                    _contexto.Entry(producidoAntiguo).State = EntityState.Modified;
+                }
+            }
+            _contexto.Database.ExecuteSqlRaw($"DELETE FROM EmpacadosDetalle WHERE EmpacadoId = {empacado.EmpacadoId}");
+            foreach (var nuevo in empacado.EmpacadoDetalles)
             {
-                _contexto.Entry(empacado).State = EntityState.Added;
+                producto = _contexto.Productos.Find(nuevo.Id);
+                if(producto != null)
+                    producto.Existencia -= nuevo.Cantidad;
+                _contexto.Entry(nuevo).State = EntityState.Added;
+            }
+            var ProducidoNuevo = _contexto.Productos.Find(empacado.ProductoId);
+            if(ProducidoNuevo != null)
+            {
+                ProducidoNuevo.Existencia += empacado.Cantidad;
+                _contexto.Entry(ProducidoNuevo).State = EntityState.Modified;
             }
             _contexto.Entry(empacado).State = EntityState.Modified;
-            return _contexto.SaveChanges() > 0;
+            modificado= _contexto.SaveChanges() > 0;
+            _contexto.Entry(empacado).State = EntityState.Detached;
         }
         catch(Exception)
         {
             return false;
         }
+        return modificado;
     }
     public bool Guardar(Empacado empacado)
     {
@@ -54,15 +102,34 @@ public class EmpacadoBLL
     }
     public bool Eliminar(Empacado empacado)
     {
+        bool modificado = false;
         try{
+            Productos? producto;
+            foreach (var detalle in empacado.EmpacadoDetalles)
+            {
+                producto = _contexto.Productos.SingleOrDefault(p => p.ProductoId == detalle.ProductoId);
+                if(producto != null)
+                {
+                    producto.Existencia += detalle.Cantidad;
+                    _contexto.Entry(producto).State = EntityState.Modified;
+                }
+            }
+            var producido = _contexto.Productos.SingleOrDefault(p => p.ProductoId == empacado.ProductoId);
+            if(producido != null)
+            {
+                producido.Existencia -= empacado.Cantidad;
+                _contexto.Entry(producido).State = EntityState.Modified;
+            }
             _contexto.Entry(empacado).State = EntityState.Deleted;
-            return _contexto.SaveChanges() > 0;
+            modificado = _contexto.SaveChanges() > 0;
+            _contexto.Entry(empacado).State = EntityState.Detached;
+            
         }
         catch(Exception)
         {
-            return false;
+            return modificado;
         }
-        
+        return modificado;
     }
     public Empacado? Buscar(int EmpacadoId)
     {
